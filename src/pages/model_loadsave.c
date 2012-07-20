@@ -49,7 +49,6 @@ static void select_cb(guiObject_t *obj, u16 sel, void *data)
     (void)data;
     const char *ico;
     mp->selected = sel + 1;
-    GUI_RemoveObj(mp->icon);
     sprintf(mp->tmpstr, "models/model%d.ini", mp->selected);
     mp->modeltype = 0;
     mp->iconstr[0] = 0;
@@ -58,7 +57,7 @@ static void select_cb(guiObject_t *obj, u16 sel, void *data)
         ico = mp->iconstr;
     else
         ico = CONFIG_GetIcon(mp->modeltype);
-    mp->icon = GUI_CreateImage(8, 88, 96, 96, ico);
+    GUI_ChangeImage(mp->icon, ico, 0, 0);
 }
 static const char *string_cb(u8 idx, void *data)
 {
@@ -83,13 +82,15 @@ static void okcancel_cb(guiObject_t *obj, void *data)
         CONFIG_ReadModel(mp->selected);  //Reload the model after saving to switch (for future saves)
     }
     GUI_RemoveAllObjects();
-    PAGE_ModelInit(0);
+    mp->return_page(0);
 }
 
-void MODELPage_ShowLoadSave(int loadsave)
+void MODELPage_ShowLoadSave(int loadsave, void(*return_page)(int page))
 {
     u8 num_models;
     GUI_RemoveAllObjects();
+    PAGE_SetModal(1);
+    mp->return_page = return_page;
     GUI_CreateButton(160, 4, BUTTON_96, "Cancel", 0x0000, okcancel_cb, (void *)0);
     GUI_CreateButton(264, 4, BUTTON_48, loadsave ? "Save" : "Load", 0x0000, okcancel_cb, (void *)(loadsave+1L));
     for (num_models = 1; num_models <= 100; num_models++) {
