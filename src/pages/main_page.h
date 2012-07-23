@@ -8,7 +8,6 @@ struct main_page {
     guiObject_t *pitchObj;
     guiObject_t *timerObj;
     guiObject_t *telemetryObj;
-    guiObject_t *menuObj;
     guiObject_t *iconObj;
     guiObject_t *nameObj;
     s16 throttle;
