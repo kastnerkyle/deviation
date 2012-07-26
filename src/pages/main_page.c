@@ -41,8 +41,8 @@ void PAGE_MainInit(int page)
     PAGE_SetModal(0);
     BUTTON_RegisterCallback(&mp->action,
           CHAN_ButtonMask(BUT_ENTER)
-          | CHAN_ButtonMask(BUT_LEFT)
-          | CHAN_ButtonMask(BUT_RIGHT)
+//          | CHAN_ButtonMask(BUT_LEFT)
+//          | CHAN_ButtonMask(BUT_RIGHT)
           | CHAN_ButtonMask(BUT_UP)
           | CHAN_ButtonMask(BUT_DOWN),
           BUTTON_PRESS | BUTTON_LONGPRESS | BUTTON_RELEASE | BUTTON_PRIORITY, action_cb, NULL);
@@ -170,7 +170,7 @@ void press_timer_cb(guiObject_t *obj, s8 press_type, void *data)
     if(press_type == -1 && ! mp->ignore_release) 
         TIMER_StartStop((long)data);
     mp->ignore_release = 0;
-    if(press_type == 1) {
+    if(press_type > 0) {
         TIMER_Reset((long)data);
         mp->ignore_release = 1;
     }
