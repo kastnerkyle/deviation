@@ -19,6 +19,7 @@
 #include "gui/gui.h"
 #include "buttons.h"
 #include "timer.h"
+#include "autodimmer.h"
 #include "music.h"
 #include "config/model.h"
 #include "config/tx.h"
@@ -102,6 +103,7 @@ void Init() {
     SOUND_Init();
     BACKLIGHT_Init();
     BACKLIGHT_Brightness(1);
+    AUTODIMMER_Init();
     SPI_FlashBlockWriteEnable(1); //Enable writing to all banks of SPIFlash
 }
 
@@ -162,6 +164,7 @@ void EventLoop()
         TIMER_Update();
         TELEMETRY_Alarm();
         BATTERY_Check();
+        AUTODIMMER_Update();
         GUI_RefreshScreen();
         next_redraw = CLOCK_getms() + SCREEN_UPDATE_MSEC;
     }
@@ -187,6 +190,7 @@ void TOUCH_Handler() {
     }
  
     if(pen_down && (!pen_down_last)) {
+        AUTODIMMER_Check();
         GUI_CheckTouch(&t, 0);
     }
     
