@@ -181,10 +181,10 @@ static u8 action_cb(u32 button, u8 flags, void *data)
     u8 result = 0;
     if(GUI_IsModal())  //Disable control when a dialog is shown
         return 0;
-    if (ActionCB != NULL)
-        result = ActionCB(button, flags, data);
-    if(! result && quick_page_enabled)
+    if(! result && quick_page_enabled)  // let the quickpage over other pages
         result = PAGE_QuickPage(button, flags, data);
+    if (!result && ActionCB != NULL)
+        result = ActionCB(button, flags, data);
     return result;
 }
 
@@ -222,7 +222,7 @@ void PAGE_ChangeQuick(int dir)
 {
     int quick = 0;
     for (int i = 0; i < 4; i++) {
-        if(Model.pagecfg.quickpage[i] && Model.pagecfg.quickpage[i] == page) {
+        if(Model.pagecfg.quickpage[i] > 1 && Model.pagecfg.quickpage[i] == page) {
             quick = i+1;
             break;
         }
@@ -230,9 +230,10 @@ void PAGE_ChangeQuick(int dir)
     int increment = dir > 0 ? 1 : NUM_QUICKPAGES;
     while(1) {
        quick = (quick + increment) % 5;
-       if (quick == 0 || Model.pagecfg.quickpage[quick-1])
+       if (quick == 0 || Model.pagecfg.quickpage[quick-1] > 1)
            break;
     }
+printf("quick new:%d\n", quick);
     if (quick == 0) {
         PAGE_ChangeByID(PAGEID_MAIN, 0);
     } else if (Model.pagecfg.quickpage[quick-1] == 1) { // bug fix: main menu should not be in quick page
@@ -244,14 +245,14 @@ int PAGE_QuickPage(u32 buttons, u8 flags, void *data)
 {
     (void)data;
 
-    if((flags & BUTTON_PRESS) && Model.pagecfg.quickbtn[0] &&
-       CHAN_ButtonIsPressed(buttons, Model.pagecfg.quickbtn[0]))
+    if((flags & BUTTON_LONGPRESS) && CHAN_ButtonIsPressed(buttons, BUT_UP))
     {
+        BUTTON_InterruptLongPress(); // avoid the quickpage switching continously
         PAGE_ChangeQuick(1);
         return 1;
-    } else if ((flags & BUTTON_PRESS) && Model.pagecfg.quickbtn[1] &&
-               CHAN_ButtonIsPressed(buttons, Model.pagecfg.quickbtn[1]))
+    } else if ((flags & BUTTON_LONGPRESS) && CHAN_ButtonIsPressed(buttons, BUT_DOWN))
     {
+        BUTTON_InterruptLongPress();
         PAGE_ChangeQuick(-1);
         return 1;
     }
