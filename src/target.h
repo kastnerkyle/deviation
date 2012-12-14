@@ -71,6 +71,7 @@ void PWR_Init(void);
 u16  PWR_ReadVoltage(void);
 int  PWR_CheckPowerSwitch();
 void PWR_Shutdown();
+void PWR_Sleep();
 
 /* Clock functions */
 #define LOW_PRIORITY_MSEC 100
@@ -86,7 +87,6 @@ u32 CLOCK_getms(void);
 void CLOCK_StartTimer(u16 us, u16 (*cb)(void));
 void CLOCK_StopTimer();
 void CLOCK_SetMsecCallback(int cb, u32 msec);
-void CLOCK_ClearMsecCallback(int cb);
 void CLOCK_StartWatchdog();
 void CLOCK_ResetWatchdog();
 

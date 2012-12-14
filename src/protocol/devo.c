@@ -24,14 +24,27 @@
 //For Debug
 //#define NO_SCRAMBLE
 
-#define TELEMETRY 1
 #define PKTS_PER_CHANNEL 4
 
 #ifdef EMULATOR
+#include <stdlib.h>
 #define BIND_COUNT 4
 #else
 #define BIND_COUNT 0x1388
 #endif
+
+#define TELEMETRY_ENABLE 0x30
+
+static const char *devo_opts[] = {
+  _tr_noop("Telemetry"),  _tr_noop("On"), _tr_noop("Off"), NULL,
+  NULL
+};
+#define TELEM_ON 0
+#define TELEM_OFF 1
+
+typedef enum {
+    PROTOOPTS_TELEMETRY = 0,
+} PROTO_OPTS_DEFINITION;
 
 enum PktState {
     DEVO_BIND,
@@ -76,6 +89,7 @@ static u8 cyrfmfg_id[6];
 static u8 num_channels;
 static u8 ch_idx;
 static u8 use_fixed_id;
+static u8 failsafe_pkt;
 
 static void scramble_pkt()
 {
@@ -109,11 +123,26 @@ static void add_pkt_suffix()
     packet[15] = (fixed_id >> 16) & 0xff;
 }
 
-static void build_beacon_pkt()
+static void build_beacon_pkt(int upper)
 {
-    packet[0] = (num_channels << 4) | 0x07;
-    memset(packet + 1, 0, 8);
-    packet[9] = 0;
+    packet[0] = ((num_channels << 4) | 0x07);
+    u8 enable = 0;
+    int max = 8;
+    int offset = 0;
+    if (upper) {
+        packet[0] += 1;
+        max = 4;
+        offset = 8;
+    }
+    for(int i = 0; i < max; i++) {
+        if (i + offset < Model.num_channels && Model.limits[i+offset].flags & CH_FAILSAFE_EN) {
+            enable |= 0x80 >> i;
+            packet[i+1] = Model.limits[i+offset].failsafe;
+        } else {
+            packet[i+1] = 0;
+        }
+    }
+    packet[9] = enable;
     add_pkt_suffix();
 }
 
@@ -189,7 +218,7 @@ static void parse_telemetry_packet(u8 *packet)
     //if (packet[0] < 0x37) {
     //    memcpy(Telemetry.line[packet[0]-0x30], packet+1, 12);
     //}
-    if (packet[0] == 0x30) {
+    if (packet[0] == TELEMETRY_ENABLE) {
         Telemetry.volt[0] = packet[1]; //In 1/10 of Volts
         Telemetry.volt[1] = packet[3]; //In 1/10 of Volts
         Telemetry.volt[2] = packet[5]; //In 1/10 of Volts
@@ -348,7 +377,8 @@ void DEVO_BuildPacket()
             }
             break;
         case DEVO_BOUND_10:
-            build_beacon_pkt();
+            build_beacon_pkt(num_channels > 8 ? failsafe_pkt : 0);
+            failsafe_pkt = failsafe_pkt ? 0 : 1;
             scramble_pkt();
             state = DEVO_BOUND_1;
             break;
@@ -384,17 +414,30 @@ static u16 devo_telemetry_cb()
             CYRF_WriteRegister(CYRF_05_RX_CTRL, 0x87); //Prepare to receive
         }
     } else {
-        if(CYRF_ReadRegister(0x07) & 0x20) {
+        if(CYRF_ReadRegister(0x07) & 0x20) { // this won't be true in emulator so we need to simulate it somehow
             CYRF_ReadDataPacket(packet);
             parse_telemetry_packet(packet);
             delay = 100 * (16 - txState);
             txState = 15;
         }
+#ifdef EMULATOR
+        u8 telem_bit = rand() % 7; // random number in [0, 7)
+        packet[0] =  TELEMETRY_ENABLE + telem_bit; // allow emulator to simulate telemetry parsing to prevent future bugs in the telemetry monitor
+        //printf("telem 1st packet: 0x%x\n", packet[0]);
+        for(int i = 1; i < 13; i++)
+            packet[i] = rand() % 256;
+        parse_telemetry_packet(packet);
+        Telemetry.time[0] =  Telemetry.time[1] =  Telemetry.time[2] = CLOCK_getms();
+        delay = 100 * (16 - txState);
+        txState = 15;
+#endif
     }
     txState++;
     if(txState == 16) { //2.3msec have passed
         CYRF_ConfigRxTx(1); //Write mode
         if(pkt_num == 0) {
+            //Keep tx power updated
+            CYRF_WriteRegister(CYRF_03_TX_CFG, 0x08 | Model.tx_power);
             radio_ch_ptr = radio_ch_ptr == &radio_ch[2] ? radio_ch : radio_ch_ptr + 1;
             CYRF_ConfigRFChannel(*radio_ch_ptr);
         }
@@ -420,6 +463,8 @@ static u16 devo_cb()
         cyrf_set_bound_sop_code();
     }   
     if(pkt_num == 0) {
+        //Keep tx power updated
+        CYRF_WriteRegister(CYRF_03_TX_CFG, 0x08 | Model.tx_power);
         radio_ch_ptr = radio_ch_ptr == &radio_ch[2] ? radio_ch : radio_ch_ptr + 1;
         CYRF_ConfigRFChannel(*radio_ch_ptr);
     }
@@ -445,6 +490,7 @@ static void initialize()
     CYRF_ConfigSOPCode(sopcodes[0]);
     set_radio_channels();
     use_fixed_id = 0;
+    failsafe_pkt = 0;
     radio_ch_ptr = radio_ch;
     memset(&Telemetry, 0, sizeof(Telemetry));
     /*
@@ -476,7 +522,7 @@ static void initialize()
         bind_counter = 0;
         cyrf_set_bound_sop_code();
     }
-    if (TELEMETRY) {
+    if (Model.proto_opts[PROTOOPTS_TELEMETRY] == TELEM_ON) {
         CLOCK_StartTimer(2400, devo_telemetry_cb);
     } else {
         CLOCK_StartTimer(2400, devo_cb);
@@ -492,9 +538,13 @@ const void *DEVO_Cmds(enum ProtoCmds cmd)
         case PROTOCMD_NUMCHAN: return (void *)12L;
         case PROTOCMD_DEFAULT_NUMCHAN: return (void *)8L;
         case PROTOCMD_CURRENT_ID:  return (void *)((unsigned long)fixed_id);
-        case PROTOCMD_SET_TXPOWER:
-            CYRF_WriteRegister(CYRF_03_TX_CFG, 0x08 | Model.tx_power);
+        case PROTOCMD_GETOPTIONS:
+            return devo_opts;
+        case PROTOCMD_SETOPTIONS:
+            PROTOCOL_Init(0);  // only 1 prot_ops item, it is to enable/disable telemetry
             break;
+        case PROTOCMD_TELEMETRYSTATE:
+            return (void *)(Model.proto_opts[PROTOOPTS_TELEMETRY] == TELEM_ON ? 1L : 0L);
         default: break;
     }
     return 0;

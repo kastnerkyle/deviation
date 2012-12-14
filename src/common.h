@@ -118,13 +118,15 @@ u64 PROTOCOL_CheckSafe();
 u32 PROTOCOL_Binding();
 u8 PROTOCOL_AutoBindEnabled();
 void PROTOCOL_Bind();
-void PROTOCOL_SetPower();
 void PROTOCOL_SetBindState(u32 msec);
 int PROTOCOL_NumChannels();
+u8 PROTOCOL_GetTelemCapability();
 int PROTOCOL_DefaultNumChannels();
 void PROTOCOL_CheckDialogs();
 u32 PROTOCOL_CurrentID();
 const char **PROTOCOL_GetOptions();
+void PROTOCOL_SetOptions();
+s8 PROTOCOL_GetTelemetryState();
 int PROTOCOL_MapChannel(int input, int default_ch);
 
 /* Input */
@@ -138,4 +140,5 @@ u32 Crc(const void *buffer, u32 size);
 const char *utf8_to_u32(const char *str, u32 *ch);
 extern volatile u8 priority_ready;
 void medium_priority_cb();
+void debug_timing(u32 type, int startend); //This is only defined if TIMING_DEBUG is defined
 #endif

@@ -86,7 +86,7 @@ void TIMER_Update()
         if (Model.timer[i].src) {
             s16 val;
             if (MIXER_SRC(Model.timer[i].src) <= NUM_INPUTS) {
-                s16 *raw = MIXER_GetInputs();
+                volatile s16 *raw = MIXER_GetInputs();
                 val = raw[MIXER_SRC(Model.timer[i].src)];
             } else {
                 val = MIXER_GetChannel(Model.timer[i].src - NUM_INPUTS - 1, APPLY_SAFETY);
@@ -125,7 +125,7 @@ void TIMER_Update()
                         MUSIC_Play(MUSIC_ALARM1 + i);
                     }
                 }
-                if (timer_val[i] > 0 && timer_val[i] < delta) {
+                if (timer_val[i] >= 0 && timer_val[i] < delta) {
                     MUSIC_Play(MUSIC_ALARM1 + i);
                 }
                 timer_val[i] -= delta;

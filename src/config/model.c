@@ -46,6 +46,7 @@ static const char RADIO_TX_POWER[] = "tx_power";
 const char * const RADIO_TX_POWER_VAL[TXPOWER_LAST] =
      { "100uW", "300uW", "1mW", "3mW", "10mW", "30mW", "100mW", "150mW" };
 
+static const char SECTION_PROTO_OPTS[] = "protocol_opts";
 /* Section: Mixer */
 static const char SECTION_MIXER[]   = "mixer";
 
@@ -74,6 +75,7 @@ static const char CHAN_LIMIT_SAFETYVAL[] = "safetyval";
 static const char CHAN_LIMIT_FAILSAFE[] = "failsafe";
 static const char CHAN_LIMIT_MAX[] = "max";
 static const char CHAN_LIMIT_MIN[] = "min";
+static const char CHAN_LIMIT_SPEED[] = "speed";
 static const char CHAN_SUBTRIM[] = "subtrim";
 #define CHAN_SCALAR   MIXER_SCALAR
 #define CHAN_TEMPLATE MODEL_TEMPLATE
@@ -194,8 +196,43 @@ static u8 get_button(const char *section, const char *value)
     return 0;
 }
 
+static int handle_proto_opts(struct Model *m, const char* key, const char* value, const char **opts)
+{
+    const char **popts = opts;
+    int idx = 0;
+    while(*popts) {
+        if(mapstrcasecmp(*popts, key) == 0) {
+            popts++;
+            int start = atoi(popts[0]);
+            int end = atoi(popts[1]);
+            if(popts[2] == 0 && (start != 0 || end != 0)) {
+                m->proto_opts[idx] = atoi(value);
+                return 1;
+            }
+            int val = 0;
+            while(popts[val]) {
+                if(mapstrcasecmp(popts[val], value) == 0) {
+                    m->proto_opts[idx] = val;
+                    return 1;
+                }
+                val++;
+            }
+            printf("Unknown protocol option '%s' for '%s'\n", value, key);
+            return 1;
+        }
+        //Find end of options
+        while(*popts) {
+            popts++;
+        }
+        popts++; //Go to next option
+        idx++;
+    }
+    return 0;
+}
+
 static int ini_handler(void* user, const char* section, const char* name, const char* value)
 {
+    CLOCK_ResetWatchdog();
     struct Model *m = (struct Model *)user;
     u16 i;
     #define MATCH_SECTION(s) strcasecmp(section, s) == 0
@@ -262,6 +299,12 @@ static int ini_handler(void* user, const char* section, const char* name, const 
         }
         printf("Unknown Radio Key: %s\n", name);
         return 0;
+    }
+    if (MATCH_SECTION(SECTION_PROTO_OPTS)) {
+        const char **opts = PROTOCOL_GetOptions();
+        if (!opts || ! *opts)
+            return 1;
+        return handle_proto_opts(m, name, value, opts);
     }
     if (MATCH_START(section, SECTION_MIXER)) {
         int idx;
@@ -399,6 +442,10 @@ static int ini_handler(void* user, const char* section, const char* name, const 
         }
         if (MATCH_KEY(CHAN_LIMIT_MIN)) {
             m->limits[idx].min = -value_int;
+            return 1;
+        }
+        if (MATCH_KEY(CHAN_LIMIT_SPEED)) {
+            m->limits[idx].speed = value_int;
             return 1;
         }
         if (MATCH_KEY(CHAN_SCALAR)) {
@@ -760,6 +807,31 @@ u8 write_mixer(FILE *fh, struct Model *m, u8 channel)
     return changed;
 }
 
+static void write_proto_opts(FILE *fh, struct Model *m)
+{
+    const char **opts = PROTOCOL_GetOptions();
+    if (!opts || ! *opts)  // bug fix: must check NULL  ptr
+        return;
+    int idx = 0;
+    fprintf(fh, "[%s]\n", SECTION_PROTO_OPTS);
+    while(*opts) {
+        int start = atoi(opts[1]);
+        int end = atoi(opts[2]);
+        if (opts[3] == 0 && (start != 0 || end != 0)) {
+            fprintf(fh, "%s=%d\n",*opts, m->proto_opts[idx]);
+        } else {
+            fprintf(fh, "%s=%s\n",*opts, opts[m->proto_opts[idx]+1]);
+        }
+        opts++;
+        while(*opts) {
+            opts++;
+        }
+        opts++;
+        idx++;
+    }
+    fprintf(fh, "\n");
+}
+
 u8 CONFIG_WriteModel(u8 model_num) {
     char file[20];
     FILE *fh;
@@ -785,6 +857,7 @@ u8 CONFIG_WriteModel(u8 model_num) {
         fprintf(fh, "%s=%d\n", RADIO_FIXED_ID, (int)m->fixed_id);
     fprintf(fh, "%s=%s\n", RADIO_TX_POWER, RADIO_TX_POWER_VAL[m->tx_power]);
     fprintf(fh, "\n");
+    write_proto_opts(fh, m);
     for(idx = 0; idx < NUM_OUT_CHANNELS; idx++) {
         if(!WRITE_FULL_MODEL &&
            m->limits[idx].flags == 0 &&
@@ -817,6 +890,8 @@ u8 CONFIG_WriteModel(u8 model_num) {
             fprintf(fh, "%s=%d\n", CHAN_LIMIT_MAX, m->limits[idx].max);
         if(WRITE_FULL_MODEL || m->limits[idx].min != DEFAULT_SERVO_LIMIT)
             fprintf(fh, "%s=%d\n", CHAN_LIMIT_MIN, -(int)m->limits[idx].min);
+        if(WRITE_FULL_MODEL || m->limits[idx].speed != 0)
+            fprintf(fh, "%s=%d\n", CHAN_LIMIT_SPEED, m->limits[idx].speed);
         if(WRITE_FULL_MODEL || m->limits[idx].subtrim != 0)
             fprintf(fh, "%s=%d\n", CHAN_SUBTRIM, m->limits[idx].subtrim);
         if(WRITE_FULL_MODEL || m->limits[idx].servoscale != 100)

@@ -62,7 +62,7 @@ void CLOCK_Init()
 
     /* Enable TIM2 interrupt. */
     nvic_enable_irq(NVIC_TIM4_IRQ);
-    nvic_set_priority(NVIC_TIM4_IRQ, 1); //High priority
+    nvic_set_priority(NVIC_TIM4_IRQ, 16); //High priority
 
     timer_disable_counter(TIM4);
     /* Reset TIM4 peripheral. */
@@ -109,6 +109,10 @@ void CLOCK_Init()
      */
     nvic_enable_irq(NVIC_TIM7_IRQ);
     nvic_set_priority(NVIC_TIM7_IRQ, 64); //Medium priority
+    /* Enable DMA Channel1 with same priority as TIM7 */
+    nvic_enable_irq(NVIC_DMA1_CHANNEL1_IRQ);
+    nvic_set_priority(NVIC_DMA1_CHANNEL1_IRQ, 65); //Medium priority
+
     /* wait for system to start up and stabilize */
     while(msecs < 100)
         ;
@@ -128,7 +132,7 @@ void CLOCK_StartTimer(u16 us, u16 (*cb)(void))
 
 void CLOCK_StartWatchdog()
 {
-    iwdg_set_period_ms(1000);
+    iwdg_set_period_ms(2000);
     iwdg_start();
 }
 
@@ -143,7 +147,13 @@ void CLOCK_StopTimer() {
 void tim4_isr()
 {
     if(timer_callback) {
+#ifdef TIMING_DEBUG
+        debug_timing(4, 0);
+#endif
         u16 us = timer_callback();
+#ifdef TIMING_DEBUG
+        debug_timing(4, 1);
+#endif
         timer_clear_flag(TIM4, TIM_SR_CC1IF);
         if (us) {
             timer_set_oc_value(TIM4, TIM_OC1, us + TIM_CCR1(TIM4));
@@ -163,13 +173,18 @@ void CLOCK_SetMsecCallback(int cb, u32 msec)
     msec_cbtime[cb] = msecs + msec;
     msec_callbacks |= (1 << cb);
 }
+
 void CLOCK_ClearMsecCallback(int cb)
 {
     msec_callbacks &= ~(1 << cb);
 }
+
+
 void tim7_isr()
 {
-    medium_priority_cb();
+    ADC_StartCapture();
+    //ADC completion will trigger update
+    //medium_priority_cb();
 }
 
 void sys_tick_handler(void)

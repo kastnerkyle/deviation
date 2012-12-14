@@ -101,10 +101,10 @@ AUX5
 Колл Инв:
 :COL Inv:
 Колл Инв:
-|devo8:COL Limit
-Колл Предел:
 :COL Limit
 Колл Предел
+|devo8:COL Limit
+Колл Предел:
 :COL Mix:
 Колл Микш:
 :CYC
@@ -119,16 +119,18 @@ AUX5
 С°
 |devo8:Celsius
 Цельсий
+:Center PW
+Центр ШИ
 :Center all \nsticks and knobs\nthen press ENT
 Отцентруйте все\nстики и ручки,\nзатем нажмите ENT
 |devo8:Center all \nsticks and knobs\nthen press ENT
 Отцентруйте все стики и ручки,\nзатем нажмите ENT
 :Ch
 Канал 
-|devo8:Chan mode
-Режим канала:
 :Chan mode
 Реж. канала:
+|devo8:Chan mode
+Режим канала:
 :Change
 Изменить
 :Channel monitor
@@ -161,6 +163,8 @@ AUX5
 Мертв.зона
 :Default
 Умолчание
+:Delta PW
+Дельта ШИ
 :Deviation FW version:
 Версия Deviation:
 :Dimmer target:
@@ -237,6 +241,8 @@ GPS
 Высокий расход
 :Icon
 Значок
+:Icon:
+Значок:
 :Input monitor
 Монитор ввода
 :Input:
@@ -335,6 +341,8 @@ GPS
 Нет
 :Normal
 Норма
+:Notch PW
+Пауза ШИ
 :Off
 Выкл.
 :Offset:
@@ -503,6 +511,8 @@ RPM
 ТелеT
 :TelemV
 ТелеV
+:Telemetry
+Телеметрия
 :Telemetry config
 Телеметрия
 :Telemetry monitor
@@ -595,6 +605,10 @@ USB
 добавить
 :countdown
 обр.отсчет
+:is not supported
+не поддерживается
+:is turned off
+выключена
 :max
 максимум
 :min

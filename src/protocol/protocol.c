@@ -119,7 +119,7 @@ int PROTOCOL_MapChannel(int input, int default_ch)
 u64 PROTOCOL_CheckSafe()
 {
     int i;
-    s16 *raw = MIXER_GetInputs();
+    volatile s16 *raw = MIXER_GetInputs();
     u64 unsafe = 0;
     for(i = 0; i < NUM_SOURCES + 1; i++) {
         if (! Model.safety[i])
@@ -161,17 +161,6 @@ u8 PROTOCOL_AutoBindEnabled()
 void PROTOCOL_Bind()
 {
     #define PROTODEF(proto, map, cmd, name) case proto: cmd(PROTOCMD_BIND); break;
-    switch(Model.protocol) {
-        #include "protocol.h"
-        case PROTOCOL_NONE:
-        default: break;
-    }
-    #undef PROTODEF
-}
-
-void PROTOCOL_SetPower()
-{
-    #define PROTODEF(proto, map, cmd, name) case proto: cmd(PROTOCMD_SET_TXPOWER); break;
     switch(Model.protocol) {
         #include "protocol.h"
         case PROTOCOL_NONE:
@@ -236,6 +225,32 @@ const char **PROTOCOL_GetOptions()
     #undef PROTODEF
     return data;
 }
+
+void PROTOCOL_SetOptions()
+{
+    #define PROTODEF(proto, map, cmd, name) case proto: cmd(PROTOCMD_SETOPTIONS); break;
+    switch(Model.protocol) {
+        #include "protocol.h"
+        case PROTOCOL_NONE:
+        default: break;
+    }
+    #undef PROTODEF
+}
+
+s8 PROTOCOL_GetTelemetryState()
+{
+    s8 telem_state=  -1;  // -1 means not support
+    #define PROTODEF(proto, map, cmd, name) case proto: telem_state = (long)cmd(PROTOCMD_TELEMETRYSTATE); break;
+    switch(Model.protocol) {
+        #include "protocol.h"
+        case PROTOCOL_NONE:
+        default:
+            telem_state = -1;
+    }
+    #undef PROTODEF
+    return telem_state;
+}
+
 void PROTOCOL_CheckDialogs()
 {
     if (PROTOCOL_WaitingForSafe()) {

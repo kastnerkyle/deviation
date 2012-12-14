@@ -43,13 +43,13 @@ enum LabelType {
     LABEL_FILL,
     LABEL_TRANSPARENT,
     LABEL_UNDERLINE,
-    LABEL_LEFT,    // align left and top vertically
+    LABEL_SQUAREBOX,
     LABEL_INVERTED,
+    LABEL_LEFT,    // align left and top vertically
     LABEL_LEFTCENTER, // align left and center vertically
     LABEL_BOX,
     LABEL_BRACKET,
     LABEL_BLINK,
-    LABEL_SQUAREBOX,
 };
 
 enum ListBoxType {

@@ -23,8 +23,12 @@ Csatornák:
 4 csat. + DR
 :5 Point
 5 pont
+:5+1
+5+1
 :6 Trims
 6 trim
+:6+1
+6+1
 :6Ch Airplane
 6 csat. repülőgép
 :6Ch Helicopter
@@ -86,12 +90,16 @@ Hangerő:
 :COL
 Kollektív
 :COL Inv
-Kollektív inv.:
+Koll. inv.:
 :COL Inv:
 Kollektív inv.:
+|devo10:COL Inv:
+Koll. inv.:
 :COL Limit
 Koll. limit
 :COL Mix:
+Kollektív mix:
+|devo10:COL Mix:
 Koll. mix:
 :CYC
 CYC
@@ -103,6 +111,8 @@ Kalibrálás kész.
 Mégsem
 :Celsius
 °C
+:Center PW
+Közép imp. hossz
 :Center all \nsticks and knobs\nthen press ENT
 Állítsa középre a \nbotkormányokat és potikat\nés nyomjon ENT-t
 :Ch
@@ -141,6 +151,8 @@ DR
 Holtsáv
 :Default
 Default
+:Delta PW
+Impulzus eltérés
 :Deviation FW version:
 Deviation verzió:
 :Dimmer target:
@@ -157,8 +169,12 @@ ELE
 ELE DR
 :ELE Inv:
 Magassági inv.:
+|devo10:ELE Inv:
+Magas. inv.:
 :ELE Mix:
 Magassági mix:
+|devo10:ELE Mix:
+Magas. mix:
 :EXPO
 EXP.
 :Enter
@@ -295,6 +311,8 @@ Nincs
 Nincs
 :Normal
 Normál
+:Notch PW
+Szünet hossz
 :Off
 Ki
 :Offset:
@@ -399,6 +417,8 @@ Botkormány:
 Subtrim:
 :SwashType:
 Imbolygó típusa:
+|devo10:SwashType:
+Imbolygó:
 :Switch %d:
 Kapcs.%d:
 :Switch1
@@ -441,6 +461,8 @@ TelemFord
 TelemHőm
 :TelemV
 TelemFesz
+:Telemetry
+Telemetria
 :Telemetry config
 Telemetria konfig.
 :Telemetry monitor
@@ -468,7 +490,7 @@ Időzítő%1:
 :Timers
 Időzítők
 :Timeup intvl:
-Lejárati interv.:
+Ismétlés interv.:
 :Toggle%d
 Jelzés%d
 :Touch Calibrate
@@ -529,6 +551,10 @@ Nulla/Max
 hozzáad
 :countdown
 Időzítő
+:is not supported
+nem támogatott
+:is turned off
+ki van kapcsolva
 :max
 max
 :min
