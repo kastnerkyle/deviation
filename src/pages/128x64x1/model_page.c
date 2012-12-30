@@ -18,6 +18,8 @@
 #include "gui/gui.h"
 #include "config/model.h"
 #include "config/tx.h"
+#include "mixer_simple.h"
+#include "simple/simple.h"
 
 #include <stdlib.h>
 
@@ -130,6 +132,13 @@ void PAGE_ModelInit(int page)
             0, ITEM_HEIGHT, &DEFAULT_FONT, NULL, NULL, _tr("# Channels:"));
     mp->chanObj = GUI_CreateTextSelectPlate(GUI_MapToLogicalView(VIEW_ID, x), GUI_MapToLogicalView(VIEW_ID, row),
             w, ITEM_HEIGHT, &DEFAULT_FONT, NULL, numchanselect_cb, NULL);
+    mp->total_items++;
+
+    row += space;
+    mp->telemStateObj = GUI_CreateLabelBox(GUI_MapToLogicalView(VIEW_ID, 0), GUI_MapToLogicalView(VIEW_ID, row),
+            0, ITEM_HEIGHT, &DEFAULT_FONT, NULL, NULL, _tr("Mixer GUI:"));
+    GUI_CreateTextSelectPlate(GUI_MapToLogicalView(VIEW_ID, x), GUI_MapToLogicalView(VIEW_ID, row),
+            w, ITEM_HEIGHT, &DEFAULT_FONT, NULL, mixermode_cb, NULL);
     mp->total_items++;
 
     // The following items are not draw in the logical view;

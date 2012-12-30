@@ -156,6 +156,8 @@ static const char *protoselect_cb(guiObject_t *obj, int dir, void *data)
         Model.num_channels = PROTOCOL_DefaultNumChannels();
         memset(Model.proto_opts, 0, sizeof(Model.proto_opts)); //This may cause an immediate change in behavior!
         GUI_Redraw(mp->chanObj);
+        if (Model.mixer_mode == MIXER_SIMPLE)
+            SIMPLEMIXER_SetChannelOrderByProtocol();
         configure_bind_button();
     }
     GUI_TextSelectEnablePress(obj, PROTOCOL_GetOptions() ? 1 : 0);
@@ -207,3 +209,21 @@ static void changeicon_cb(guiObject_t *obj, const void *data)
     (void)data;
     MODELPage_ShowLoadSave(3, PAGE_ModelInit);
 }
+
+static const char *mixermode_cb(guiObject_t *obj, int dir, void *data)
+{
+    (void)data;
+    (void)obj;
+    u8 changed = 0;
+    Model.mixer_mode = GUI_TextSelectHelper(Model.mixer_mode, 0, 1, dir, 1, 1, &changed);
+    if (changed && Model.mixer_mode == MIXER_SIMPLE) {
+        if (!SIMPLEMIXER_ValidateTraditionModel()) {
+            Model.mixer_mode = MIXER_ADVANCED;
+            PAGE_ShowInvalidSimpleMixerDialog(mp->telemStateObj);
+        } else {
+            SIMPLEMIXER_SetChannelOrderByProtocol();
+        }
+    }
+    return SIMPLEMIXER_ModeName(Model.mixer_mode);
+}
+

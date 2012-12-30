@@ -13,10 +13,10 @@
  along with Deviation.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "common.h"
-#include "pages.h"
+#include "../pages.h"
 #include "config/model.h"
 
-#include "../common/_mixer_setup.c"
+#include "../../common/advanced/_mixer_setup.c"
 
 #define FIRST_PAGE_ITEM_IDX  2  // 0 is the template obj and 1 is the button obj
 #define LEFT_VIEW_WIDTH  60
@@ -164,7 +164,7 @@ static void _show_complex()
     y += space;
     labelDesc.style = LABEL_CENTER;
     mp->itemObj[mp->max_scroll++] = GUI_CreateTextSelectPlate(GUI_MapToLogicalView(LEFT_VIEW_ID, x), GUI_MapToLogicalView(LEFT_VIEW_ID, y),
-            w, ITEM_HEIGHT, &labelDesc, sourceselect_cb, set_source_cb, &mp->cur_mixer->sw);
+            w, ITEM_HEIGHT, &labelDesc, sourceselect_cb, set_drsource_cb, &mp->cur_mixer->sw);
 
     y += space;
     labelDesc.style = LABEL_LEFTCENTER;

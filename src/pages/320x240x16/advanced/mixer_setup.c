@@ -13,10 +13,10 @@
  along with Deviation.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "common.h"
-#include "pages.h"
+#include "../pages.h"
 #include "config/model.h"
 
-#include "../common/_mixer_setup.c"
+#include "../../common/advanced/_mixer_setup.c"
 
 #define COL1_TEXT   4
 #define COL1_VALUE  56
@@ -129,7 +129,7 @@ static void _show_complex()
     }
     //Row 2
     mp->expoObj[0] = GUI_CreateLabel(COL1_TEXT, 64, NULL, DEFAULT_FONT, _tr("Switch:"));
-    GUI_CreateTextSelect(COL1_VALUE, 64, TEXTSELECT_96, 0x0000, sourceselect_cb, set_source_cb, &mp->cur_mixer->sw);
+    GUI_CreateTextSelect(COL1_VALUE, 64, TEXTSELECT_96, 0x0000, sourceselect_cb, set_drsource_cb, &mp->cur_mixer->sw);
     GUI_CreateLabel(COL2_TEXT, 64, NULL, DEFAULT_FONT, _tr("Mux:"));
     GUI_CreateTextSelect(COL2_VALUE, 64, TEXTSELECT_96, 0x0000, NULL, set_mux_cb, NULL);
     //Row 3

@@ -32,13 +32,20 @@ void PAGE_ModelInit(int page)
 
     mp->file_state = 0;
     PAGE_SetModal(0);
-    PAGE_ShowHeader(PAGE_GetName(PAGEID_MODEL));
+    if (Model.mixer_mode == MIXER_SIMPLE)
+        PAGE_ShowHeader_ExitOnly(PAGE_GetName(PAGEID_MODEL), MODELMENU_Show);
+    else
+        PAGE_ShowHeader(PAGE_GetName(PAGEID_MODEL));
 
     row = 40;
     GUI_CreateLabel(8, row, NULL, DEFAULT_FONT, _tr("File:"));
     GUI_CreateTextSelect(136, row, TEXTSELECT_96, 0x0000, file_press_cb, file_val_cb, NULL);
 
-    row += 32;
+    row+= 20;
+    GUI_CreateLabel(8, row, NULL, DEFAULT_FONT, _tr("Mixer GUI:"));
+    GUI_CreateTextSelect(136, row, TEXTSELECT_96, 0x0000, NULL, mixermode_cb, NULL);
+
+    row += 20;
     GUI_CreateLabel(8, row, NULL, DEFAULT_FONT, _tr("Model name:"));  // use the same naming convention for devo8 and devo10
     GUI_CreateButton(136, row, BUTTON_96x16, show_text_cb, 0x0000, _changename_cb, Model.name);
     GUI_CreateButton(236, row, BUTTON_64x16, show_text_cb, 0x0000, changeicon_cb, _tr("Icon"));
@@ -47,7 +54,7 @@ void PAGE_ModelInit(int page)
     GUI_CreateLabel(8, row, NULL, DEFAULT_FONT, _tr("Model type:"));
     GUI_CreateTextSelect(136, row, TEXTSELECT_96, 0x0000, type_press_cb, type_val_cb, NULL);
 
-    row += 32;
+    row += 24;
     GUI_CreateLabel(8, row, NULL, DEFAULT_FONT, _tr("Protocol:"));
     GUI_CreateTextSelect(136, row, TEXTSELECT_96, 0x0000, proto_press_cb, protoselect_cb, NULL);
 
