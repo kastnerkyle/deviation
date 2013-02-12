@@ -49,14 +49,14 @@ AIL DR
 Sens AIL
 :AIL Mix:
 Mix. AIL
+>:AUX2
+>:AUX3
 :AUX4
 AUX4
 :AUX5
 AUX5
-:AUX6
-AUX6
-:AUX7
-AUX7
+>:AUX6
+>:AUX7
 :About Deviation
 A propos...
 :Advanced
@@ -69,12 +69,11 @@ Alarme
 Tempo alarme
 :Altitude
 Altitude
-:Auto
-Auto
-:Aux2
-Aux2
+>:Auto
+>:Aux2
 :Backlight:
 Luminosité
+>:Bad/missing\nprotocol modules!
 :Bar %d:
 Barre %d:
 :Bars:
@@ -97,20 +96,20 @@ Appairage...   %d sec.\n Appuyer sur ENT\npour arrêter
 Box%d:
 :Button monitor
 Ctrl des boutons
-:Buzz settings
-Réglages Son
+>:Buzz settings
 :Buzz volume:
 Vol. buzzer
+>:Buzzer settings
 :COL
-PAS
+COL
 :COL Inv
-Sens PAS
+Sens COL
 :COL Inv:
-Sens PAS
+Sens COL 
 :COL Limit
-Limite PAS
+Limite COL 
 :COL Mix:
-Mix. PAS 
+Mix. COL 
 :CYC
 CYC
 :Calibrate
@@ -159,18 +158,11 @@ Cyclique2
 Cyclique3
 :D/R & Exp
 D/R & Exp
-:D/R&Exp -AIL
-D/R & Exp AIL
-:D/R&Exp -ELE
-D/R & Exp ELE
-:D/R&Exp -RUD
-D/R & Exp RUD
-:DR0
-DR0
-:DR1
-DR1
-:Deadband
-Deadband
+>:D/R&Exp -AIL
+>:D/R&Exp -ELE
+>:D/R&Exp -RUD
+:DR
+DR
 :Deadband
 Deadband
 :Default
@@ -187,24 +179,10 @@ Veille après
 Bas
 :Down
 Bas
-:Do you really want\nto reset\nthe permanent timer?
-Vous allez remettre\n le Totalisateur\nà zéro?
 :ELE
 ELE
 :ELE DR
 ELE DR
-:ELE DR0
-ELE DR0
-:ELE DR1
-ELE DR1
-:ELE DR2
-ELE DR2
-:ELE Inv:
-Sens ELE 
-:ELE Inv:
-Sens ELE 
-:ELE Mix:
-Mix. ELE 
 :ELE Inv:
 Sens ELE 
 :ELE Mix:
@@ -217,20 +195,20 @@ Entrée
 Sortie
 :Expo&DR
 Expo&DR 
-:FMODE0
-FMODE0
-:FMODE1
-FMODE1
-:FMODE2
-FMODE2
+>:FMODE
+<:FMODE0
+<FMODE0
+<:FMODE1
+<FMODE1
+<:FMODE2
+<FMODE2
 :Fahren
 °F
-:Failsafe
-Sécurités
-:Failsafe:
-Failsafe:
 :Fail safe
 Sécurités
+>:Failsafe
+:Failsafe:
+Failsafe:
 :File:
 Fichier
 :Fixed
@@ -238,29 +216,22 @@ Fixe
 :Fixed ID:
 ID fixe
 :Fly mode
-Mode de Vol
+Acrobatie
 :Foot
 Pied
 :Frame Size
 Larg. Signal
-:permanent
-Total
 :GEAR
 GEAR
-:GEAR0
-GEAR0
-:GEAR1
-GEAR1
 :GPS
 GPS
-:GPS
-GPS
-:GPS
-GPS
+>:Gear
 :Generic settings
 Réglages
 :Gyro sense
 Gain gyro
+>:H
+>:HOLD
 :Heli
 Heli
 :Heli/Standard GUI
@@ -269,16 +240,17 @@ Heli/Interface Std.
 Helicoptère
 :High-Rate
 Petit Déb.
-:Hold position
-Valeur coupure
+<:Hold Position
+<Valeur Thr hold
+>:Hold position
 :Icon
 Icône
 :Icon:
 Icône
 :Idle 1
-Sport 1
+Idle 1
 :Idle 2
-Sport 2
+Idle 2
 :Input monitor
 Ctrl. des entrées
 :Input:
@@ -287,12 +259,14 @@ Entrée
 Ajouter
 :Inverted
 Inversé
+>:L
 :LCD settings
 Réglage Ecran
 :LEFT_H
 GAUCHE_H
 :LEFT_V
 GAUCHE_V
+>:LIN
 :Language:
 Langue:
 :Latitude
@@ -315,12 +289,14 @@ Longitude
 Batterie vide
 :Low-Rate
 Grand Déb.
-:MIX0
-MIX0
-:MIX1
-MIX1
-:MIX2
-MIX2
+>:M
+>:MIX
+<:MIX0
+<MIX0
+<:MIX1
+<MIX1
+<:MIX2
+<MIX2
 :Main menu
 Menu principal
 :Main page
@@ -345,6 +321,7 @@ Mixer
 Réglages
 :Mixers:
 Nbr mixers
+>:Mode
 :Mode %d
 Mode %d
 :Model menu
@@ -396,7 +373,7 @@ PAS
 :Page:
 Page
 :Pit Mix:
-Mix. PAS
+Mixage plateau
 :Pitch curves
 Courbes de pas
 :Plane
@@ -405,10 +382,14 @@ Avion
 Point:
 :Pos
 Pos.
+>:Pos 0:
+>:Pos 1:
+>:Pos 2:
 :Pos/Neg:
 Pos./Neg.:
-:PwrDn alert:
-Alrm. d'arrêt 
+>:Position %d
+:PowerOff alert
+Alerte d'arrêt 
 :Prealert intvl:
 Tempo préAlarm
 :Prealert time:
@@ -427,6 +408,7 @@ Appuyer sur ENT\n pour passer \n le mode USB sur:
 Aperçu: Appuie-Long ENT
 :Protocol:
 Protocole
+>:PwrDn alert:
 :RIGHT_H
 DROITE_H
 :RIGHT_V
@@ -445,14 +427,12 @@ Réinit.
 Supprimer
 :Reset
 Reset
-:Reset Permanent Timer?
-Reinitialisation totalisateur?
 :Reset sw:
 Inter RaZ
-:Reverse:
-Sens:
 :Reverse
 Sens servos
+:Reverse:
+Sens:
 :Reversed
 Inversé
 :Revert
@@ -467,14 +447,14 @@ Sécurité
 Sécurité:
 :Save
 Sauve
-:Scale:
-Echelle
 :Scale%s:
 Echelle%s:
+>:Scale:
 :Scanner
 Scanner
-:Select switch icon
-Choix de l'icone
+<:Select switch icon
+<Choix de l'icone
+>:Servo
 :Simple
 Simple
 :Simple 4 Channel
@@ -489,6 +469,7 @@ Source
 Source
 :Standard
 Standard
+>:Standard Mixer
 :Start:
 Durée:
 :Step:
@@ -499,14 +480,16 @@ Entrées  sticks/aux.
 Mode
 :Sticks:
 Sticks
+>:Sub-trim
+>:Subtrim
 :Subtrim:
 Subtrim
 :Swash
-Plateau cyclique
+Plateau cycl.
 :SwashType:
-Type Plat.
-:Switch %d:
-Inter %d
+Plateau cycl.:
+<:Switch %d:
+<Inter %d
 :Switch assignment
 Affect. Inters
 :Switch1
@@ -518,7 +501,7 @@ Commande
 :Symmetric
 Symétrique
 :THR
-GAZ
+THR
 :TRIMLH+
 TRIMGH+
 :TRIMLH-
@@ -543,6 +526,7 @@ TRIM_G-
 TRIM_D+
 :TRIM_R-
 TRIM_D-
+>:TRN
 :TelemRPM
 Télém.T/mn
 :TelemT
@@ -568,9 +552,9 @@ Gabarit...
 :Test
 Test
 :Thr hold
-Coup. Gaz
+Thr hold
 :Throttle curves
-Courbes de gaz
+Courbes de Gaz
 :Throttle hold
 Coupure gaz
 :Time
@@ -625,14 +609,14 @@ Activer
 Puiss. TX
 :USB
 USB
-:USB Filesystem is currently
-L'USB partition est actuellement
+>:USB Filesystem is currently 
 :Unknown
 Inconnu
 :Unlocked
 Débloqué
 :Up
 Haut
+>:Value
 :Value:
 Valeur:
 :Vibration:
@@ -651,6 +635,8 @@ Volt:
 ajouter
 :countdown
 A rebours
+<:fulltime
+<Total
 :is not supported
 Non supporté
 :is turned off
@@ -661,7 +647,8 @@ max
 min
 :mult
 multiplier
+>:permanent
 :replace
 remplacer
 :stopwatch
-Chrono.
+Chronomètre
