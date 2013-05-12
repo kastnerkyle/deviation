@@ -74,6 +74,7 @@ static const char * const MIXER_CURVETYPE_VAL[CURVE_MAX+1] = {
    "none", "fixed", "min/max", "zero/max", "greater-than-0", "less-than-0", "absval",
    "expo", "deadband", "3point", "5point", "7point", "9point", "11point", "13point" };
 static const char MIXER_CURVE_POINTS[] = "points";
+static const char MIXER_CURVE_SMOOTH[] = "smooth";
 
 /* Section: Channel */
 static const char SECTION_CHANNEL[] = "channel";
@@ -476,13 +477,13 @@ static int ini_handler(void* user, const char* section, const char* name, const 
             return 1;
         }
         if (MATCH_KEY(MIXER_USETRIM)) {
-            m->mixers[idx].apply_trim = value_int;
+            MIXER_SET_APPLY_TRIM(&m->mixers[idx], value_int);
             return 1;
         }
         if (MATCH_KEY(MIXER_MUXTYPE)) {
             for (i = 0; i < NUM_STR_ELEMS(MIXER_MUXTYPE_VAL); i++) {
                 if (MATCH_VALUE(MIXER_MUXTYPE_VAL[i])) {
-                    m->mixers[idx].mux = i;
+                    MIXER_SET_MUX(&m->mixers[idx], i);
                     return 1;
                 }
             }
@@ -492,7 +493,7 @@ static int ini_handler(void* user, const char* section, const char* name, const 
         if (MATCH_KEY(MIXER_CURVETYPE)) {
             for (i = 0; i < NUM_STR_ELEMS(MIXER_CURVETYPE_VAL); i++) {
                 if (MATCH_VALUE(MIXER_CURVETYPE_VAL[i])) {
-                    m->mixers[idx].curve.type = i;
+                    CURVE_SET_TYPE(&m->mixers[idx].curve, i);
                     return 1;
                 }
             }
@@ -505,6 +506,10 @@ static int ini_handler(void* user, const char* section, const char* name, const 
                 printf("%s: Too many points (max points = %d\n", section, MAX_POINTS);
                 return 0;
             }
+            return 1;
+        }
+        if (MATCH_KEY(MIXER_CURVE_SMOOTH)) {
+            CURVE_SET_SMOOTHING(&m->mixers[idx].curve, value_int);
             return 1;
         }
         printf("%s: Couldn't parse key: %s\n", section, name);
@@ -956,12 +961,12 @@ u8 write_mixer(FILE *fh, struct Model *m, u8 channel)
             fprintf(fh, "%s=%d\n", MIXER_SCALAR, m->mixers[idx].scalar);
         if(WRITE_FULL_MODEL || m->mixers[idx].offset != 0)
             fprintf(fh, "%s=%d\n", MIXER_OFFSET, m->mixers[idx].offset);
-        if(WRITE_FULL_MODEL || m->mixers[idx].apply_trim != 1)
-            fprintf(fh, "%s=%d\n", MIXER_USETRIM, m->mixers[idx].apply_trim);
-        if(WRITE_FULL_MODEL || m->mixers[idx].mux != 0)
-            fprintf(fh, "%s=%s\n", MIXER_MUXTYPE, MIXER_MUXTYPE_VAL[m->mixers[idx].mux]);
-        if(WRITE_FULL_MODEL || m->mixers[idx].curve.type != 0) {
-            fprintf(fh, "%s=%s\n", MIXER_CURVETYPE, MIXER_CURVETYPE_VAL[m->mixers[idx].curve.type]);
+        if(WRITE_FULL_MODEL || ! MIXER_APPLY_TRIM(&m->mixers[idx]))
+            fprintf(fh, "%s=%d\n", MIXER_USETRIM, MIXER_APPLY_TRIM(&m->mixers[idx]) ? 1 : 0);
+        if(WRITE_FULL_MODEL || MIXER_MUX(&m->mixers[idx]))
+            fprintf(fh, "%s=%s\n", MIXER_MUXTYPE, MIXER_MUXTYPE_VAL[MIXER_MUX(&m->mixers[idx])]);
+        if(WRITE_FULL_MODEL || CURVE_TYPE(&m->mixers[idx].curve)) {
+            fprintf(fh, "%s=%s\n", MIXER_CURVETYPE, MIXER_CURVETYPE_VAL[CURVE_TYPE(&m->mixers[idx].curve)]);
             u8 num_points = CURVE_NumPoints(&m->mixers[idx].curve);
             if (num_points > 0) {
                 fprintf(fh, "%s=", MIXER_CURVE_POINTS);
@@ -972,6 +977,8 @@ u8 write_mixer(FILE *fh, struct Model *m, u8 channel)
                 }
                 fprintf(fh, "\n");
             }
+            if (CURVE_SMOOTHING(&m->mixers[idx].curve))
+                fprintf(fh, "%s=%d\n", MIXER_CURVE_SMOOTH, CURVE_SMOOTHING(&m->mixers[idx].curve) ? 1 : 0);
         }
     }
     return changed;
@@ -1227,7 +1234,7 @@ void clear_model(u8 full)
     Model.swashmix[2] = 60;
     for(i = 0; i < NUM_MIXERS; i++) {
         Model.mixers[i].scalar = 100;
-        Model.mixers[i].apply_trim = 1;
+        MIXER_SET_APPLY_TRIM(&Model.mixers[i], 1);
     }
     for(i = 0; i < NUM_OUT_CHANNELS; i++) {
         MIXER_SetDefaultLimit(&Model.limits[i]);
@@ -1263,6 +1270,10 @@ u8 CONFIG_ReadModel(u8 model_num) {
     crc32 = Crc(&Model, sizeof(Model));
     if(! Model.name[0])
         sprintf(Model.name, "Model%d", model_num);
+    if (PPMin_Mode())
+        PPMin_Start();
+    else
+        PPMin_Stop();
 
     STDMIXER_Preset(); // bug fix: this must be invoked in all modes
     return 1;
@@ -1345,7 +1356,7 @@ u8 CONFIG_ReadTemplateByIndex(u8 template_num) {
 }
 
 u8 CONFIG_ReadTemplate(const char *filename) {
-    char file[20];
+    char file[25];
 
     sprintf(file, "template/%s", filename);
     clear_model(0);
