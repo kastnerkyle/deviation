@@ -1,0 +1,40 @@
+#ifndef _DEVO7E_TARGET_H_
+#define _DEVO7E_TARGET_H_
+
+#define TXID 0x7e
+#define VECTOR_TABLE_LOCATION 0x0000
+#define SPIFLASH_SECTOR_OFFSET 0
+#define SPIFLASH_SECTORS 512
+
+//#ifdef BUILDTYPE_DEV
+//No room for debug and standard gui
+//#define NO_STANDARD_GUI     1
+//#endif
+
+#define NO_LANGUAGE_SUPPORT 1
+
+#define MIN_BRIGHTNESS 0
+#define HAS_TOUCH 0
+#define HAS_VIBRATINGMOTOR 1
+#define HAS_LOGICALVIEW 1
+#define DEFAULT_BATTERY_ALARM 4100
+#define DEFAULT_BATTERY_CRITICAL 3900
+#define MAX_BATTERY_ALARM 12000
+#define MIN_BATTERY_ALARM 3300
+#define MAX_POWER_ALARM 60
+
+#define NUM_OUT_CHANNELS 12
+#define NUM_VIRT_CHANNELS 10
+
+#define NUM_TRIMS 6
+#define NUM_TOGGLES 5
+#define MAX_POINTS 13
+#define NUM_MIXERS ((NUM_OUT_CHANNELS + NUM_VIRT_CHANNELS) * 4)
+
+#define INP_HAS_CALIBRATION 4
+
+/* Compute voltage from y = 2.1592x + 0.2493 */
+#define VOLTAGE_NUMERATOR 216
+#define VOLTAGE_OFFSET    249
+
+#endif //_DEVO7E_TARGET_H_
