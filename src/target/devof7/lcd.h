@@ -19,7 +19,8 @@
 #define LCD_ALIGN_LEFT      0
 #define LCD_ALIGN_CENTER    1
 #define LCD_ALIGN_RIGHT     2
-#define lcd_show_line(string, line, align) lcd_show_line_f(string, strlen(string), line, align)
-#define lcd_show_string(string, line, pos) lcd_show_string_f(string, strlen(string), line, pos)
+
+void lcd_show_string(const char string[], u8 line, s8 pos);
+void lcd_show_line(const char string[], u8 line, u8 align);
 
 #endif //LCD_H

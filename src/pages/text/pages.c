@@ -94,25 +94,17 @@ void PAGE_ChangeByID(enum PageID id, s8 menuPage)
     pages[cur_page].init(menuPage);
 }
 
-static guiLabel_t headerLabel;
 void PAGE_ShowHeader(const char *title)
 {
-    struct LabelDesc labelDesc;
-    labelDesc.font = DEFAULT_FONT.font;
-    labelDesc.font_color = 0xffff;
-    labelDesc.style = LABEL_UNDERLINE;
-    labelDesc.outline_color = 1;
-    GUI_CreateLabelBox(&headerLabel, 0, 0, LCD_WIDTH, ITEM_HEIGHT, &labelDesc, NULL, NULL, title);
+    lcd_show_line(title, 0, LCD_ALIGN_CENTER);
 }
 
 void PAGE_ShowHeaderWithHeight(const char *title, u8 font, u8 width, u8 height)
 {
-    struct LabelDesc labelDesc;
-    labelDesc.font = font;
-    labelDesc.font_color = 0xffff;
-    labelDesc.style = LABEL_UNDERLINE;
-    labelDesc.outline_color = 1;
-    GUI_CreateLabelBox(&headerLabel, 0, 0, width, height, &labelDesc, NULL, NULL, title);
+    (void) font;
+    (void) width;
+    (void) height;
+    lcd_show_line(title, 0, LCD_ALIGN_CENTER);
 }
 
 void PAGE_ShowHeader_ExitOnly(const char *title, void (*CallBack)(guiObject_t *obj, const void *data))
@@ -127,10 +119,13 @@ void PAGE_ShowHeader_SetLabel(const char *(*label_cb)(guiObject_t *obj, const vo
     (void)data;
 }
 void PAGE_RemoveHeader()
-{}
+{
+    lcd_show_string("", 0, LCD_ALIGN_CENTER);
+}
 
 void PAGE_RemoveAllObjects()
 {
+    LCD_Clear(0);
     if(! GUI_IsEmpty()) {
         GUI_RemoveAllObjects();
         memset(&gui_objs, 0, sizeof(gui_objs));

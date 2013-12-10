@@ -102,9 +102,19 @@ void lcd_convert_string(const char string[], u8 length, u8* output) {
         output[i] = charmap[(u8)string[i]];
 }
 
+// Calculate string length
+u8 lcd_string_lenght(const char string[]) {
+    u8 i = 0;
+    while(string[i] != 0 && i < LCD_SCREEN_CHARS) i++;
+    return i;
+}
+
 // Show a string at a certain position
-void lcd_show_string_f(const char string[], u8 length, u8 line, u8 pos) {
+void lcd_show_string(const char string[], u8 line, s8 pos) {
     u8 cmd[LCD_SCREEN_CHARS+2];
+    u8 length = lcd_string_lenght(string);
+    if(pos == -1)
+        pos = LCD_SCREEN_CHARS-length;
     u16 position = (line << 5) + pos;
 
     // Check if it fits inside the screen
@@ -124,9 +134,10 @@ void lcd_show_string_f(const char string[], u8 length, u8 line, u8 pos) {
 }
 
 // Show a string at a certain line
-void lcd_show_line_f(const char string[], u8 length, u8 line, u8 align) {
+void lcd_show_line(const char string[], u8 line, u8 align) {
     char new_string[LCD_SCREEN_CHARS];
     u8 pos_x, i, j;
+    u8 length = lcd_string_lenght(string);
 
     // Check if it is inside the screen
     if(line > LCD_SCREEN_LINES || length > LCD_SCREEN_CHARS)
@@ -151,7 +162,7 @@ void lcd_show_line_f(const char string[], u8 length, u8 line, u8 align) {
         }
     }
 
-    lcd_show_string_f(new_string, LCD_SCREEN_CHARS, line, 0);
+    lcd_show_string(new_string, line, 0);
 }
 
 void LCD_Init()
