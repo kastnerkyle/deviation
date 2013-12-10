@@ -1,4 +1,4 @@
-SCREENSIZE := 128x64x1
+SCREENSIZE := text
 FILESYSTEM := devof7
 
 CRC_OFFSET       := 8192

@@ -18,12 +18,20 @@
 
 static const u16 columns[] = {GPIO5, GPIO6, GPIO7, GPIO8, 0xffff};
 static const u16 rows[] = {GPIO6, GPIO7, GPIO8, GPIO9, 0xffff};
-static const u8 buttonmap[] = {
+/*static const u8 buttonmap[] = {
     BUT_TRIM_RH_POS, BUT_TRIM_RH_NEG, BUT_TRIM_RV_POS, BUT_TRIM_RV_NEG,
     BUT_LAST,        BUT_ENTER,       BUT_RIGHT,       BUT_LEFT,
     BUT_TRIM_LV_POS, BUT_TRIM_LV_NEG, BUT_TRIM_LH_NEG, BUT_TRIM_LH_POS,
     BUT_LAST,        BUT_DOWN,        BUT_UP,          BUT_EXIT,
-    };
+    };*/
+static const u8 buttonmap[] = {
+    BUT_UP, BUT_DOWN, BUT_ENTER, BUT_LAST,
+    BUT_RIGHT, BUT_LEFT, BUT_EXIT, BUT_LAST,
+    BUT_TRIM_LV_NEG, BUT_TRIM_LV_POS, BUT_LAST, BUT_LAST,              //LR, RR, -RD, -RU
+    BUT_TRIM_LH_NEG, BUT_TRIM_LH_POS, BUT_LAST, BUT_LAST,              //LL, RL, -LD, -LU
+    }; 
+    //RR, -LD   -RD,RL 
+                  
 
 #define COL_PORT GPIOB
 #define COL_PORT_MASK (GPIO5 | GPIO6 | GPIO7 | GPIO8)
