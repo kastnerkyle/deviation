@@ -62,8 +62,8 @@ void PAGE_MainInit(int page)
     s16 batt = PWR_ReadVoltage();
     char batt_string[15];
     sprintf(batt_string, "%s %dmV",RADIO_TX_POWER_VAL[Model.tx_power], batt);
-    lcd_show_string(batt_string, 0, -1);
-    lcd_show_string(Model.name, 0, 0);
+    lcd_show_string(batt_string, 0, -1, 0);
+    lcd_show_string(Model.name, 0, 0, 0);
 }
 
 static void _check_voltage()
@@ -84,7 +84,7 @@ static void _check_voltage()
             showing = 1;
         }
 
-        lcd_show_string(batt_string, 0, -1);
+        lcd_show_string(batt_string, 0, -1, 0);
     }
 }
 

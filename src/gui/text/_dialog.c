@@ -18,6 +18,8 @@ void _draw_dialog_box(struct guiBox *box, int x, const char *title)
     (void)box;
     (void)x;
     (void)title;
+
+    //lcd_show_line(title, 0, LCD_ALIGN_CENTER);
 }
 
 void _dialog_draw_background(u16 x, u16 y, u16 w, u16 h)

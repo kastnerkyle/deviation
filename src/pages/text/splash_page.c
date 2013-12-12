@@ -31,9 +31,9 @@ void PAGE_SplashInit(int page)
     PAGE_RemoveAllObjects();
     PAGE_SetActionCB(_action_cb);
     
-    lcd_show_line("TU Delft MAVLab", 0, LCD_ALIGN_CENTER);
-    lcd_show_line("Deviation TX", 1, LCD_ALIGN_CENTER);
-    lcd_show_line("c Freek van Tienen", 11, LCD_ALIGN_CENTER);
+    lcd_show_line("TU Delft MAVLab", 0, LCD_ALIGN_CENTER, 0);
+    lcd_show_line("Deviation TX", 1, LCD_ALIGN_CENTER, 0xC3);
+    lcd_show_line("c Freek van Tienen", 11, LCD_ALIGN_CENTER, 0);
 }
 
 static u8 _action_cb(u32 button, u8 flags, void *data)

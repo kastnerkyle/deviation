@@ -29,8 +29,8 @@ static void _draw_page(u8 enable)
 
     sprintf(up->tmpstr, "%s %s",
             _tr("Press ENT to turn \nUSB drive"),
-            enable == 0 ? _tr("On") : _tr("Off"));
-    GUI_CreateLabelBox(&gui->label, 0, 15, LCD_WIDTH, 40, &DEFAULT_FONT, NULL, NULL, up->tmpstr);
+            enable == 0 ? _tr("on") : _tr("off"));
+    GUI_CreateLabelBox(&gui->label, 0, 4, 0, 0, &DEFAULT_FONT, NULL, NULL, up->tmpstr);
 }
 
 static u8 _action_cb(u32 button, u8 flags, void *data)

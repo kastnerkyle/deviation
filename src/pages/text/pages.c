@@ -96,7 +96,7 @@ void PAGE_ChangeByID(enum PageID id, s8 menuPage)
 
 void PAGE_ShowHeader(const char *title)
 {
-    lcd_show_line(title, 0, LCD_ALIGN_CENTER);
+    lcd_show_line(title, 0, LCD_ALIGN_CENTER, 0);
 }
 
 void PAGE_ShowHeaderWithHeight(const char *title, u8 font, u8 width, u8 height)
@@ -104,7 +104,7 @@ void PAGE_ShowHeaderWithHeight(const char *title, u8 font, u8 width, u8 height)
     (void) font;
     (void) width;
     (void) height;
-    lcd_show_line(title, 0, LCD_ALIGN_CENTER);
+    lcd_show_line(title, 0, LCD_ALIGN_CENTER, 0);
 }
 
 void PAGE_ShowHeader_ExitOnly(const char *title, void (*CallBack)(guiObject_t *obj, const void *data))
@@ -120,7 +120,7 @@ void PAGE_ShowHeader_SetLabel(const char *(*label_cb)(guiObject_t *obj, const vo
 }
 void PAGE_RemoveHeader()
 {
-    lcd_show_string("", 0, LCD_ALIGN_CENTER);
+    lcd_show_string("", 0, LCD_ALIGN_CENTER, 0);
 }
 
 void PAGE_RemoveAllObjects()

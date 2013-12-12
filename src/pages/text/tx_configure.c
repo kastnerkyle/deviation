@@ -64,7 +64,7 @@ static int row_cb(int absrow, int relrow, int y, void *data)
     void *tgl = NULL;
     void *value = NULL;
     void *but_str = NULL;
-    #define X 68
+    #define X 5
     u8 x = X;
 
     switch(absrow) {
@@ -152,21 +152,18 @@ static int row_cb(int absrow, int relrow, int y, void *data)
             break;
     }
     if (title) {
-        enum LabelType oldType = labelDesc.style;
-        labelDesc.style = LABEL_UNDERLINE;
         GUI_CreateLabelBox(&gui->title, 0, y,
-                0, ITEM_HEIGHT, &labelDesc, NULL, NULL, _tr(title));
-        labelDesc.style = oldType;
-        y += ITEM_HEIGHT + 1;
+                0, 0, &DEFAULT_FONT, NULL, NULL, _tr(title));
+        y += 1;
     }
-    GUI_CreateLabelBox(&gui->label[relrow], 0, y,
-            0, ITEM_HEIGHT,  &DEFAULT_FONT, NULL, NULL, _tr(label));
+    GUI_CreateLabelBox(&gui->label[relrow], 1, y,
+            0, 0,  &DEFAULT_FONT, NULL, NULL, _tr(label));
     if(but_str) {
-        GUI_CreateButtonPlateText(&gui->value[relrow].but, x, y,
-            LCD_WIDTH - ARROW_WIDTH - x - 1, ITEM_HEIGHT, &DEFAULT_FONT, but_str, 0x0000, tgl, data);
+        //GUI_CreateButtonPlateText(&gui->value[relrow].but, 1+x, y,
+        //    0, 0, &DEFAULT_FONT, but_str, 0x0000, tgl, data);
     } else {
-        GUI_CreateTextSelectPlate(&gui->value[relrow].ts, x, y,
-            LCD_WIDTH - ARROW_WIDTH - x - 1, ITEM_HEIGHT, &DEFAULT_FONT, NULL, value, data);
+        //GUI_CreateTextSelectPlate(&gui->value[relrow].ts, x, y,
+        //    0, 0, &DEFAULT_FONT, NULL, value, data);
     }
     return 1;
 }
@@ -182,9 +179,9 @@ void PAGE_TxConfigureInit(int page)
     cp->total_items = 0;
 
 
-    GUI_CreateScrollable(&gui->scrollable, 0, ITEM_HEIGHT + 1, LCD_WIDTH, LCD_HEIGHT - ITEM_HEIGHT -1,
-                     ITEM_SPACE, ITEM_LAST, row_cb, getobj_cb, size_cb, NULL);
-    GUI_SetSelected(GUI_ShowScrollableRowOffset(&gui->scrollable, current_selected));
+    GUI_CreateScrollable(&gui->scrollable, 0, 1, LCD_WIDTH, LCD_HEIGHT -1,
+                     1, ITEM_LAST, row_cb, getobj_cb, size_cb, NULL);
+    //GUI_SetSelected(GUI_ShowScrollableRowOffset(&gui->scrollable, current_selected));
 }
 
 static const char *_contrast_select_cb(guiObject_t *obj, int dir, void *data)

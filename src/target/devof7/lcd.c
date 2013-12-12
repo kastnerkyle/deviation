@@ -25,6 +25,7 @@
 // The screen dimensions
 #define LCD_SCREEN_LINES    11
 #define LCD_SCREEN_CHARS    24
+extern struct cur_str;
 
 static unsigned char charmap[] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, //0
@@ -110,7 +111,7 @@ u8 lcd_string_lenght(const char string[]) {
 }
 
 // Show a string at a certain position
-void lcd_show_string(const char string[], u8 line, s8 pos) {
+void lcd_show_string(const char string[], u8 line, s8 pos, u16 color) {
     u8 cmd[LCD_SCREEN_CHARS+2];
     u8 length = lcd_string_lenght(string);
     if(pos == -1)
@@ -127,14 +128,17 @@ void lcd_show_string(const char string[], u8 line, s8 pos) {
     LCD_CMDLength(cmd, 2);
 
     // Convert the string
-    cmd[0] = 0xC0;
+    if(color != 0xC0 && color != 0xC2 && color != 0xC3)
+        cmd[0] = 0xC0;
+    else
+        cmd[0] = color&0xFF; //C0->normal C2->flashing C3->flashing
     lcd_convert_string(string, length, &cmd[1]);
     cmd[length+1] = 0x7F;
     LCD_CMDLength(cmd, length+2);
 }
 
 // Show a string at a certain line
-void lcd_show_line(const char string[], u8 line, u8 align) {
+void lcd_show_line(const char string[], u8 line, u8 align, u16 color) {
     char new_string[LCD_SCREEN_CHARS];
     u8 pos_x, i, j;
     u8 length = lcd_string_lenght(string);
@@ -162,7 +166,7 @@ void lcd_show_line(const char string[], u8 line, u8 align) {
         }
     }
 
-    lcd_show_string(new_string, line, 0);
+    lcd_show_string(new_string, line, 0, color);
 }
 
 void LCD_Init()
@@ -239,7 +243,7 @@ void LCD_Clear(unsigned int val)
     (void) val;
 
     for(i = 0; i <= LCD_SCREEN_LINES; i++)
-        lcd_show_line("", i, LCD_ALIGN_LEFT);
+        lcd_show_line("", i, LCD_ALIGN_LEFT, 0);
 }
 
 void LCD_DrawStart(unsigned int x0, unsigned int y0, unsigned int x1, unsigned int y1, enum DrawDir _dir)

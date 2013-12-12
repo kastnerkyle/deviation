@@ -20,7 +20,7 @@
 #define LCD_ALIGN_CENTER    1
 #define LCD_ALIGN_RIGHT     2
 
-void lcd_show_string(const char string[], u8 line, s8 pos);
-void lcd_show_line(const char string[], u8 line, u8 align);
+void lcd_show_string(const char string[], u8 line, s8 pos, u16 color);
+void lcd_show_line(const char string[], u8 line, u8 align, u16 color);
 
 #endif //LCD_H

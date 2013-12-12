@@ -16,39 +16,12 @@
 #include "gui/gui.h"
 
 struct FAT FontFAT;
-/*
- * The font 'font_table' begins with a list of u24 values which represent
- * the offeset (from the beginning of the font file) of each character.
- * The font data follows immediately afterwards.
- *
- * The font data is represented as a bit-field.  A chunk of 1, 2, 3, or 4
- * bytes represents a single column of pixels.  This will be repeated for
- * the width of the font.
- * The column chunk can be thought of as a little-endian number of 8, 16, 24,
- * 32, 40, 48, 54 or 64 bits, with the low-order bit representing the top row,
- * and the 'height'-th bit representing the bottom row.
- *
- * Example: Here is a '!' as a 1x10 bit-field:
- *        *    1
- *        *    1
- *        *    1
- *        *    1
- *        *    1
- *        *    1
- *        *    1
- *             0   = 0x7F
- *        *    1
- *        *    1   = 0x03
- *
- *  So this would appear as '0x7F, 0x03' in the font table
- *
- */
-//#define LINE_SPACING 2 // move to _gui.h as devo10's line spacing is different from devo8's
-#define CHAR_SPACING 1
-#define RANGE_TABLE_SIZE 20
-#define NUM_FONTS 10
-
-#define HEIGHT(x) x.height
+static struct {
+    unsigned int x_start;
+    unsigned int x;
+    unsigned int y;
+    u16          color;
+} cur_str;
 
  u8 FONT_GetFromString(const char * name) {
     (void) name;
@@ -57,7 +30,7 @@ struct FAT FontFAT;
 
 void LCD_PrintCharXY(unsigned int x, unsigned int y, u32 c)
 {
-    (void) x; (void) y; (void) c;
+    lcd_show_string((char*)&c, y, x, cur_str.color);
 }
 
 u8 LCD_SetFont(unsigned int idx)
@@ -73,32 +46,65 @@ u8 LCD_GetFont()
 
 void LCD_SetXY(unsigned int x, unsigned int y)
 {
-    (void) x; (void) y;
+    cur_str.x_start = x;
+    cur_str.x = x;
+    cur_str.y = y;
 }
 
 void LCD_PrintStringXY(unsigned int x, unsigned int y, const char *str)
 {
-    (void) x; (void) y; (void) str;
+    LCD_SetXY(x, y);
+    LCD_PrintString(str);
 }
 
 void LCD_PrintString(const char *str)
 {
-    (void) str;
+    while(*str != 0) {
+        u32 ch;
+        str = utf8_to_u32(str, &ch);
+        LCD_PrintChar(ch);
+    }
 }
 
 void LCD_PrintChar(u32 c)
 {
-    (void) c;
+    if(c == '\n') {
+        // New line
+        cur_str.x = cur_str.x_start;
+        cur_str.y++;
+    } else {
+        LCD_PrintCharXY(cur_str.x, cur_str.y, c);
+        cur_str.x++;
+    }
+
 }
 
 void LCD_GetCharDimensions(u32 c, u16 *width, u16 *height) {
-    (void) c; (void) width; (void) height;
+    (void) c;
+    *height = 1;
+    *width = 1;
 }
 
 void LCD_GetStringDimensions(const u8 *str, u16 *width, u16 *height) {
-    (void) str; (void) width; (void) height;
+    u16 width_t, height_t;
+
+    height_t = 0;
+    width_t = 0;
+    while(*str != 0) {
+        u32 ch;
+        str = (u8*)utf8_to_u32((char*)str, &ch);
+        if(ch == '\n')
+            height_t++;
+        width_t++;
+    }
+
+    *width = width_t;
+    *height = height_t;
 }
 
 void LCD_SetFontColor(u16 color) {
-    (void) color;
+    if(color == 0x0)
+        cur_str.color = 0xC3;
+    else
+        cur_str.color = 0xC0;
 }

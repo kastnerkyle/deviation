@@ -1,7 +1,7 @@
 #ifndef _GUIOBJ_H_
 #define _GUIOBJ_H_
 struct about_obj {
-    guiLabel_t label[3];
+    guiLabel_t label[5];
 };
 
 struct splash_obj {
