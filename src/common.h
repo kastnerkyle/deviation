@@ -40,7 +40,7 @@ u8 CONFIG_SaveModelIfNeeded();
 void CONFIG_SaveTxIfNeeded();
 
 /* LCD primitive functions */
-#if target == devof7
+#if TARGET == devof7
 #include "lcd.h"
 #endif
 void LCD_Clear(unsigned int color);
