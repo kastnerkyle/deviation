@@ -57,34 +57,34 @@ void PAGE_MainInit(int page)
     PAGE_SetModal(0);
     PAGE_SetActionCB(_action_cb);
     PAGE_RemoveAllObjects();
-    next_scan = CLOCK_getms()+BATTERY_SCAN_MSEC;
 
-    s16 batt = PWR_ReadVoltage();
-    char batt_string[15];
-    sprintf(batt_string, "%s %dmV",RADIO_TX_POWER_VAL[Model.tx_power], batt);
-    lcd_show_string(batt_string, 0, -1, 0);
     lcd_show_string(Model.name, 0, 0, 0);
+    _check_voltage();
 }
 
 static void _check_voltage()
 {
-    static u8 showing = 1;
+    static u8 video_on = 0;
     if (CLOCK_getms() > next_scan)  {  // don't need to check battery too frequently, to avoid blink of the battery label
+        if(video_on == 0) {
+            //LCD_ShowVideo();
+            video_on = 1;
+        }
+
+
         next_scan = CLOCK_getms() + BATTERY_SCAN_MSEC;
         s16 batt = PWR_ReadVoltage();
-        char batt_string[15];
 
-        // Blink if battery low
-        if (batt < Transmitter.batt_alarm && showing) {
-            sprintf(batt_string, "%s      ",RADIO_TX_POWER_VAL[Model.tx_power]);
-            showing = 0;
-        }
-        else {
-            sprintf(batt_string, "%s %dmV",RADIO_TX_POWER_VAL[Model.tx_power], batt);
-            showing = 1;
-        }
+        // Creeate and show the string
+        lcd_show_string(RADIO_TX_POWER_VAL[Model.tx_power], 0, -8, 0);
 
-        lcd_show_string(batt_string, 0, -1, 0);
+        // Blink battery level if low
+        char batt_string[6];
+        sprintf(batt_string, "%dmV", batt);
+        if (batt < Transmitter.batt_alarm)
+            lcd_show_string(batt_string, 0, -1, 0xFFFF);
+        else
+            lcd_show_string(batt_string, 0, -1, 0x0);
     }
 }
 

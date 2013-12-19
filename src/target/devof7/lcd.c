@@ -175,8 +175,8 @@ u8 lcd_string_length(const char string[]) {
 void lcd_show_string(const char string[], u8 line, s8 pos, u16 color) {
     u8 cmd[LCD_SCREEN_CHARS+2];
     u8 length = lcd_string_length(string);
-    if(pos == -1)
-        pos = LCD_SCREEN_CHARS-length;
+    if(pos < 0)
+        pos = LCD_SCREEN_CHARS-length+pos+1;
 
     // Check if it fits inside the screen
     if(line > LCD_SCREEN_LINES || pos+length > LCD_SCREEN_CHARS)
