@@ -103,8 +103,8 @@ void LCD_GetStringDimensions(const u8 *str, u16 *width, u16 *height) {
 }
 
 void LCD_SetFontColor(u16 color) {
-    if(color == 0x0)
-        cur_str.color = 0xC3;
+    if(color == 0x0000)
+        cur_str.color = 0xFFFF;
     else
-        cur_str.color = 0xC0;
+        cur_str.color = 0x0000;
 }

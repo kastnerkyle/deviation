@@ -27,6 +27,63 @@
 #define LCD_SCREEN_CHARS    24
 extern struct cur_str;
 
+// The IA911 chip defines
+#define LCD_IA911_CLEAR_VRAM        0x00
+#define LCD_IA911_DISPLAY           0x10
+#define LCD_IA911_COLOR             0x20
+#define LCD_IA911_BACKGROUND        0x30
+#define LCD_IA911_CLOCK             0x40
+#define LCD_IA911_VIDEO_SEL         0x48
+#define LCD_IA911_OSSIL_SEL         0x50
+#define LCD_IA911_DISPLAY_POS       0x8000
+#define LCD_IA911_WRITE_ADDR        0x8800
+#define LCD_IA911_OUTPUT_LVL        0x9004
+#define LCD_IA911_CHAR_SIZE         0x9800
+#define LCD_IA911_TEST_MODE         0xB000
+#define LCD_IA911_DISPLAY_CHAR      0xC0
+
+// IA911 Display options
+#define LCD_IA911_DO                (0x1<<3)
+#define LCD_IA911_LC                (0x1<<2)
+#define LCD_IA911_BL1               (0x1<<1)
+#define LCD_IA911_BL0               (0x1<<0)
+
+// IA911 Color options
+#define LCD_IA911_R                 (0x1<<3)
+#define LCD_IA911_G                 (0x1<<2)
+#define LCD_IA911_B                 (0x1<<1)
+
+// IA911 Background options
+#define LCD_IA911_BS1               (0x1<<2)
+#define LCD_IA911_BS0               (0x1<<1)
+
+// IA911 Clock options
+#define LCD_IA911_I_MODE            (0x1<<2)
+#define LCD_IA911_XOSC              (0x1<<0)
+
+// IA911 Video select options
+#define LCD_IA911_P2                (0x1<<2)
+#define LCD_IA911_P1                (0x1<<1)
+#define LCD_IA911_P0                (0x1<<0)
+
+// IA911 Ossilation mode options
+#define LCD_IA911_XFC               (0x1<<1)
+
+// IA911 character size options
+#define LCD_IA911_S0                (0x1<<6)
+
+// IA911 Output level options
+#define LCD_IA911_VPD               (0x1<<8)
+#define LCD_IA911_VC1               (0x1<<1)
+#define LCD_IA911_VC0               (0x1<<0)
+
+// IA911 Display char options
+#define LCD_IA911_BL                (0x1<<1)
+#define LCD_IA911_DISPLAY_OFF       0x7E
+#define LCD_IA911_TRANSFER_END      0x7F
+
+
+// The character mapping
 static unsigned char charmap[] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, //0
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, //8
@@ -62,33 +119,37 @@ static unsigned char charmap[] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, //248
 };
 
-void LCD_Cmd(u8 cmd) {
-    volatile int i;
+void LCD_CMDLength(const u8 cmd[], u8 length) {
+    volatile int i, j;
     CS_LO();
+
+    // Wait a couple of clock ticks
     i = 300;
     while(i) i--;
-    spi_xfer(SPI1, cmd);
-    i = 300;
-    while(i) i--;
+
+    for(i = 0; i < length; i++) {
+        spi_xfer(SPI1, cmd[i]);
+
+        // Wait a couple of clock ticks
+        j = 2000;
+        while(j) j--;
+    }
     CS_HI();
 
-    i = 2000;
+    // Wait a couple of clock ticks
+    i = 300;
     while(i) i--;
 }
 
-void LCD_CMDLength(u8 cmd[], u8 length) {
-    volatile int i, j;
-    CS_LO();
-    i = 300;
-    while(i) i--;
-    for(i = 0; i < length; i++) {
-    	spi_xfer(SPI1, cmd[i]);
-    	j = 2000;
-    	while(j) j--;
-    }
-    CS_HI();
-    i = 300;
-    while(i) i--;
+void LCD_Cmd(const u16 cmd) {
+    u8 new_cmd[2];
+    new_cmd[0] = cmd >> 8;
+    new_cmd[1] = cmd & 0xFF;
+
+    if(cmd>>8)
+        LCD_CMDLength(new_cmd, 2);
+    else
+        LCD_CMDLength(&new_cmd[1], 1);
 }
 
 void LCD_Contrast(u8 contrast)
@@ -104,7 +165,7 @@ void lcd_convert_string(const char string[], u8 length, u8* output) {
 }
 
 // Calculate string length
-u8 lcd_string_lenght(const char string[]) {
+u8 lcd_string_length(const char string[]) {
     u8 i = 0;
     while(string[i] != 0 && i < LCD_SCREEN_CHARS) i++;
     return i;
@@ -113,27 +174,27 @@ u8 lcd_string_lenght(const char string[]) {
 // Show a string at a certain position
 void lcd_show_string(const char string[], u8 line, s8 pos, u16 color) {
     u8 cmd[LCD_SCREEN_CHARS+2];
-    u8 length = lcd_string_lenght(string);
+    u8 length = lcd_string_length(string);
     if(pos == -1)
         pos = LCD_SCREEN_CHARS-length;
-    u16 position = (line << 5) + pos;
 
     // Check if it fits inside the screen
-    if(line > LCD_SCREEN_LINES || pos+length > LCD_SCREEN_CHARS) //TODO
+    if(line > LCD_SCREEN_LINES || pos+length > LCD_SCREEN_CHARS)
         return;
 
     // Send the position
-    cmd[0] = 0x88 + (position >> 8);
-    cmd[1] = position & 0xFF;
-    LCD_CMDLength(cmd, 2);
+    LCD_Cmd(LCD_IA911_WRITE_ADDR | ((line << 5) + pos));
+
+    // Start sending characters
+    cmd[0] = LCD_IA911_DISPLAY_CHAR;
+    if(color == 0xFFFF)
+        cmd[0] = cmd[0] | LCD_IA911_BL; //Blink
 
     // Convert the string
-    if(color != 0xC0 && color != 0xC2 && color != 0xC3)
-        cmd[0] = 0xC0;
-    else
-        cmd[0] = color&0xFF; //C0->normal C2->flashing C3->flashing
     lcd_convert_string(string, length, &cmd[1]);
-    cmd[length+1] = 0x7F;
+
+    // Send the string
+    cmd[length+1] = LCD_IA911_TRANSFER_END;
     LCD_CMDLength(cmd, length+2);
 }
 
@@ -141,7 +202,7 @@ void lcd_show_string(const char string[], u8 line, s8 pos, u16 color) {
 void lcd_show_line(const char string[], u8 line, u8 align, u16 color) {
     char new_string[LCD_SCREEN_CHARS];
     u8 pos_x, i, j;
-    u8 length = lcd_string_lenght(string);
+    u8 length = lcd_string_length(string);
 
     // Check if it is inside the screen
     if(line > LCD_SCREEN_LINES || length > LCD_SCREEN_CHARS)
@@ -171,7 +232,6 @@ void lcd_show_line(const char string[], u8 line, u8 align, u16 color) {
 
 void LCD_Init()
 {
-    u8 cmd[2];
     /* Enable GPIOA clock. */
     rcc_peripheral_enable_clock(&RCC_APB2ENR, RCC_APB2ENR_IOPAEN);
 
@@ -199,42 +259,25 @@ void LCD_Init()
     gpio_set_mode(GPIOB, GPIO_MODE_OUTPUT_50_MHZ,
                   GPIO_CNF_OUTPUT_PUSHPULL, GPIO0);
 
+    LCD_Cmd(LCD_IA911_CLEAR_VRAM); //Clear the VRAM
 
-    LCD_Cmd(0x00);
-
+    // Wait for a couple of clock ticks
     volatile int i = 0x4FFFF;
     while(i) i--;
 
-    LCD_Cmd(0x1E);
-    LCD_Cmd(0x22);
-    LCD_Cmd(0x32);
-    LCD_Cmd(0x49);
-    LCD_Cmd(0x52);
+    LCD_Cmd(LCD_IA911_DISPLAY | LCD_IA911_DO | LCD_IA911_LC | LCD_IA911_BL1); // Display on, LC ossillator on, Blink at 1Hz
+    LCD_Cmd(LCD_IA911_COLOR | LCD_IA911_B); // Background color blue
+    LCD_Cmd(LCD_IA911_BACKGROUND | LCD_IA911_BS0); // Background black framing
+    LCD_Cmd(LCD_IA911_VIDEO_SEL | LCD_IA911_P0); // Set video to PAL
+    LCD_Cmd(LCD_IA911_OSSIL_SEL | LCD_IA911_XFC); // Set ossilator XOSCI pin connected
+    LCD_Cmd(LCD_IA911_OUTPUT_LVL | LCD_IA911_VC1 | LCD_IA911_VC0); // Set screen brightness to 90 IRE
+    LCD_Cmd(LCD_IA911_TEST_MODE); // Test the internal circuit
+    LCD_Cmd(LCD_IA911_CLOCK | LCD_IA911_I_MODE | LCD_IA911_XOSC); // Set to internal mode en enable ossilator (0x45)
+    LCD_Cmd(LCD_IA911_DISPLAY_POS | (13-1)<<4 | (5-1)); //13 Vertical and 5 Horizontal as display position
 
-    cmd[0] = 0x90;
-    cmd[1] = 0x07;
-    LCD_CMDLength(cmd, 2);
-
-    cmd[0] = 0xb0;
-    cmd[1] = 0x00;
-    LCD_CMDLength(cmd, 2);
-
-    LCD_Cmd(0x45);
-
-    cmd[0] = 0x80;
-    cmd[1] = 0xc4;
-    LCD_CMDLength(cmd, 2);
-
-    for(i = 0; i < 0x0b; i++) {
-    	cmd[0] = 0x98;
-        cmd[1] = i;
-        LCD_CMDLength(cmd, 2);
-    }
-
-    i = 0x8000;
-    while(i) i--;
-
-    LCD_Cmd(0x45);
+    // Set the character size to 1dot for all lines
+    for(i = 0; i < LCD_SCREEN_LINES; i++)
+        LCD_Cmd(LCD_IA911_CHAR_SIZE | i);
 }
 
 void LCD_Clear(unsigned int val)
@@ -253,7 +296,7 @@ void LCD_DrawStart(unsigned int x0, unsigned int y0, unsigned int x1, unsigned i
 
 void LCD_DrawStop(void)
 {
-    
+
 }
 
 void LCD_DrawPixel(unsigned int color)
@@ -264,4 +307,9 @@ void LCD_DrawPixel(unsigned int color)
 void LCD_DrawPixelXY(unsigned int x, unsigned int y, unsigned int color)
 {
     (void) x; (void) y; (void) color;
+}
+
+void LCD_ShowVideo(void)
+{
+    LCD_Cmd(LCD_IA911_CLOCK | LCD_IA911_XOSC); // Set to external mode en enable ossilator
 }
